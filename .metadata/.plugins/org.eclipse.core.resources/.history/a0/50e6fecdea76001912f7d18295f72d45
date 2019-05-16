@@ -1,0 +1,5 @@
+package com.chatserver.controller;
+
+public class YychatDbUtil {
+
+}

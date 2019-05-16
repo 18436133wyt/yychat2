@@ -1,0 +1,10 @@
+package com.chatserver.controller;
+
+public class StartServerbak {
+
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+
+	}
+
+}
