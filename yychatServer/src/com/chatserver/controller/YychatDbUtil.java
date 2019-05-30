@@ -5,6 +5,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Date;
 
 public class YychatDbUtil {
 	//静态成员（字符串类型的符号常量），也叫类成员
@@ -32,22 +33,70 @@ public class YychatDbUtil {
 		}
 		return conn;
 	}
+	//添加新用户的方法
+	public static void addUser(String userName,String passWord){
+		Connection conn=getConnection();
+		String user_Add_Sql="insert into user(username,password,registertimestamp) values(?,?,?)";
+		PreparedStatement ptmt=null;
+		try{
+			ptmt=conn.prepareStatement(user_Add_Sql);
+			ptmt.setString(1,userName);
+			ptmt.setString(2,passWord);
+			//java.util.Date date=new java.util.Date();//类的完全限定名
+			Date date=new Date();
+			java.sql.Timestamp timestamp=new java.sql.Timestamp(date.getTime());
+			ptmt.setTimestamp(3,timestamp);
+			//4.执行prepardStatement
+			int count =ptmt.executeUpdate();
+		}catch (SQLException e) {
+			e.printStackTrace();
+		}finally{
+			closeDB(conn,ptmt);
+		}
+	}
+	//在User表中查找userName用户
+	public static boolean seekUser(String userName){
+		boolean seekSuccess=false;
+		Connection conn=getConnection();
+		String user_Seek_Sql="select * from user where username=?";
+		PreparedStatement ptmt=null;
+		ResultSet rs=null;
+		try{
+			ptmt=conn.prepareStatement(user_Seek_Sql);
+			ptmt.setString(1, userName);
+			//4.执行prepardStatement
+			rs=ptmt.executeQuery();
+			//5.判断结果集
+			seekSuccess=rs.next();
+		}catch (SQLException e) {
+			e.printStackTrace();
+		}finally{
+			closeDB(conn,ptmt,rs);
+		}
+		return seekSuccess;
+	}
+
+	
 	//3.建立一个prepareStatement
 	public static boolean looginValidate(String userName,String passWord){
 		boolean loginSuccess=false;
 		Connection conn=getConnection();
 		String user_Login_Sql="select * from user where username=? and password=?";
-		PreparedStatement ptmt;
+		PreparedStatement ptmt=null;
+		ResultSet rs=null;
 		try{
 			ptmt=conn.prepareStatement(user_Login_Sql);
 			ptmt.setString(1, userName);
 			ptmt.setString(2, passWord);
 			//4.执行prepardStatement
-			ResultSet rs=ptmt.executeQuery();
+			rs=ptmt.executeQuery();
 			//5.判断结果集
+			
 			loginSuccess=rs.next();
 		}catch (SQLException e) {
 			e.printStackTrace();
+		}finally{
+			closeDB(conn,ptmt,rs);
 		}
 		return loginSuccess;
 	}
@@ -71,7 +120,7 @@ public class YychatDbUtil {
 		}
 		return friendString;
 	}
-	private static void closeDB(Connection conn, PreparedStatement ptmt,ResultSet rs) {
+	private static void closeDB(Connection conn, PreparedStatement ptmt, ResultSet rs) {
 		if(conn!=null){
 			try{
 				conn.close();
@@ -92,8 +141,26 @@ public class YychatDbUtil {
 			}catch (SQLException e){
 				e.printStackTrace();
 			}
-		}
+		}	
 		
 	}
 
+
+private static void closeDB(Connection conn, PreparedStatement ptmt) {
+	if(conn!=null){
+		try{
+			conn.close();
+		}catch (SQLException e){
+			e.printStackTrace();
+		}
+	}
+	if(ptmt!=null){
+		try{
+			ptmt.close();
+		}catch (SQLException e){
+			e.printStackTrace();
+		}
+	}
+	
+}
 }

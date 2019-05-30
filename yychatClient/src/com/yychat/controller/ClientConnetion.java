@@ -23,6 +23,27 @@ public class ClientConnetion {
 			e.printStackTrace();
 		}
 	}
+	//注册新用户步骤5：创建registerUserIntoDB方法来发送user对象到服务器端，并接收服务器返回的message
+	public boolean registerUserIntoDB(User user){
+		boolean registerSuccess=false;
+		ObjectOutputStream oos;
+		Message mess=null;
+		try {
+			//把字节输出流对象 包装成 对象输出流对象
+			oos=new ObjectOutputStream(s.getOutputStream());
+			oos.writeObject(user);			
+			
+			ObjectInputStream ois=new ObjectInputStream(s.getInputStream());
+			mess=(Message)ois.readObject();//接收
+			if(mess.getMessageType().equals(Message.message_RegisterSuccess)){
+				registerSuccess=true;
+				s.close();//关闭客户端的socket对象
+			}
+	        }catch (IOException | ClassNotFoundException e) {
+		          e.printStackTrace();
+	        }
+		return registerSuccess;
+	}
 	
 	public Message loginValidate(User user){
 		//对象的输入输出流
