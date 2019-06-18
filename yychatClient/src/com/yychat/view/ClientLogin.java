@@ -16,9 +16,8 @@ import com.yychat.model.Message;
 import com.yychat.model.User;
 //1、在类中实现动作监听器接口
 public class ClientLogin extends JFrame implements ActionListener{//类名：ClientLogin,继承
+	public static HashMap hmFriendList=new HashMap<String,FriendList>();//定义保存FriendList对像的HashMap
 	
-	public static HashMap hmFriendList=new HashMap<String,FriendList>();
-
 	//北部的组件
 	JLabel jlbl1;
 	
@@ -60,7 +59,7 @@ public class ClientLogin extends JFrame implements ActionListener{//类名：Client
 		this.add(jtp1);		
 		
 		//创建南部组件
-		jb1=new JButton(new ImageIcon("images/denglu.gif"));
+		jb1=new JButton(new ImageIcon("images/denglu.gi1f"));
 		jb1.addActionListener(this);//2、添加监听器
 		
 		jb2=new JButton(new ImageIcon("images/zhuce.gif"));
@@ -84,55 +83,59 @@ public class ClientLogin extends JFrame implements ActionListener{//类名：Client
 	@Override
 	public void actionPerformed(ActionEvent arg0) {//3、添加事件处理代码
 		//注册新用户步骤2：响应动作代码
-		if(arg0.getSource()==jb2){
+		if(arg0.getSource()==jb2) {
 			String userName=jtf1.getText();
 			String passWord=new String(jpf1.getPassword());
 			User user=new User();
 			user.setUserName(userName);
-			user.setPassWord(passWord);
+			user.setPassWord(passWord);			
 			user.setUserMessageType("USER_REGISTER");
 			boolean registerSuccess=new ClientConnetion().registerUserIntoDB(user);
-			//注册新用户步骤4：注册成功或失败的提示信息
+			
+			//注册新用户步骤4：显示注册成功或失败的提示信息
 			if(registerSuccess){
-				JOptionPane.showMessageDialog(this, "注册成功");
+				JOptionPane.showMessageDialog(this, "注册成功！");
 			}else{
-				JOptionPane.showMessageDialog(this, "注册失败，该用户名已经存在！");
-			}
+				JOptionPane.showMessageDialog(this, "用户名已存在，注册失败！");
+			}			
 		}
-		
 		
 		if(arg0.getSource()==jb1) {
 			String userName=jtf1.getText();
 			String passWord=new String(jpf1.getPassword());
 			User user=new User();
 			user.setUserName(userName);
-			user.setPassWord(passWord);		
+			user.setPassWord(passWord);	
 			user.setUserMessageType("USER_LOGIN");
 			//密码验证，密码是123456验证成功，否则验证失败
 			Message mess=new ClientConnetion().loginValidate(user);
 			if(mess.getMessageType().equals(Message.message_LoginSuccess)){
 				
-			    String friendString=mess.getContent();
-				FriendList friendList=new FriendList(userName,friendString);
+				String friendString=mess.getContent();
+				FriendList friendList=new FriendList(userName,friendString);//把好友名字传递到好友列表对象
+				//保存friendList
 				hmFriendList.put(userName, friendList);
 				
+				//第1步
+				//发送message_RequestOnlineFriend信息给服务器
 				Message mess1=new Message();
 				mess1.setSender(userName);
 				mess1.setReceiver("Server");
+				//设置信息类型，请求获得哪些好友在线
 				mess1.setMessageType(Message.message_RequestOnlineFriend);
 				Socket s=(Socket)ClientConnetion.hmSocket.get(userName);
 				ObjectOutputStream oos;
-				try{
+				try {
 					oos=new ObjectOutputStream(s.getOutputStream());
 					oos.writeObject(mess1);
-				}catch (IOException e){
+				} catch (IOException e) {
 					e.printStackTrace();
-				}
-			
+				}				
+				
 				
 				this.dispose();
-			}else{
-				JOptionPane.showMessageDialog(this, "密码错误");
+			}else{//登录失败
+				JOptionPane.showMessageDialog(this, "用户名或密码错误");
 			}			
 			
 		}

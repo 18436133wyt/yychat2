@@ -83,8 +83,9 @@ public class FriendChat1 extends JFrame implements ActionListener{//÷ª‘ –Ìµ•ºÃ≥–
 			}			
 		}		
 	}
-
+	
 	public void appendJta(String chatMessageString){
-		jta.append(chatMessageString+"\r\n");
+		jta.append(chatMessageString);
 	}
+	
 }
